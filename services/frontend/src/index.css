@@ -1,0 +1,107 @@
+:root {
+  --primary-color: #076DB2;
+  --secondary-color: #0495DF;
+  --tertiary-color: #D9D9D9;
+}
+
+@media (min-width: 0px) {
+  .auth {
+    width: 80%;
+  }
+
+  .course {
+    width: 100%;
+  }
+
+  .dashboard-buttons {
+    width: 45%;
+  }
+}
+
+@media (min-width: 1200px) {
+  .auth {
+    width: 60%;
+  }
+
+  .dashboard-buttons {
+    width: 30%;
+  }
+
+  .course {
+    width: 75%;
+  }
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link:hover {
+  background-color: var(--secondary-color);
+}
+
+.nav-link.active {
+  background-color: var(--secondary-color);
+}
+
+.navbar {
+  background-color: var(--primary-color);
+}
+
+.icons {
+  width: 15%;
+}
+
+.auth {
+  background-color: var(--tertiary-color);
+}
+
+.login.btn {
+  background-color: var(--primary-color);
+}
+
+.login.btn:hover {
+  background-color: var(--secondary-color);
+}
+
+.dashboard-page {
+  top: 10%;
+}
+
+.dashboard {
+  color: var(--primary-color);
+}
+
+.line {
+  height: 5px;
+  background-color: var(--primary-color);
+}
+
+.button.btn {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.button.btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.search-bar {
+  background-color: var(--tertiary-color);
+}
+
+.toast {
+  top: 5%;
+  right: 5%;
+}
+
+.square {
+  color: var(--primary-color);
+}
+
+.title {
+  color: var(--primary-color);
+}
