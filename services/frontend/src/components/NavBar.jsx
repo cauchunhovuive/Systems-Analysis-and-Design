@@ -1,62 +1,45 @@
-import logo from '../assets/CRS.png';
-import { Link, useLocation } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBell, faComment, faCircleUser } from '@fortawesome/free-regular-svg-icons';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthProvider';
 
-const NavBar = ({ state }) => {
-  const location = useLocation();
-  const { handleLogout } = useAuth();
-  const getClass = (paths) =>
-    paths.includes(location.pathname)
-      ? 'nav-link active text-white py-lg-4'
-      : 'nav-link text-white py-lg-4'
-  return (
-    <nav className="navbar navbar-expand p-0 position-absolute w-100">
-      <div className="container-fluid h-100">
-        <img src={logo} alt='CRS' width={50} className='py-lg-2' />
-        {state ?
-          <>
-            <ul className="navbar-nav me-auto mb-lg-0 ms-lg-3 fw-bold fs-5">
-              <li className="nav-item">
-                <Link to="#" className={getClass([])}>Home</Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/" className={getClass(["/"])}>Dashboard</Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/courses" className={getClass(["/courses", "/enrollments"])}>Courses</Link>
-              </li>
-            </ul>
-            <div className="d-flex justify-content-evenly icons">
-              <FontAwesomeIcon icon={faBell} size='2xl' color='white' />
-              <FontAwesomeIcon icon={faComment} size='2xl' color='white' />
-              <div className='dropstart'>
-                <FontAwesomeIcon
-                  icon={faCircleUser}
-                  size='2xl'
-                  color='white'
-                  role='button'
-                  onClick={() => {
-                    const list = window.document.getElementById('user-options');
-                    list.style.display = list.style.display === 'block' ? 'none' : 'block';
-                  }}
-                />
-                <ul className='dropdown-menu end-0' id='user-options'>
-                  <li><button
-                    className="dropdown-item"
-                    onClick={() => handleLogout()}
-                  >
-                    Logout
-                  </button></li>
-                </ul>
-              </div>
+const Navbar = () => {
+    const { isAuthenticated, logout, user } = useAuth();
+
+    if (!isAuthenticated) return null;
+
+    return (
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow mb-4">
+            <div className="container">
+                <Link className="navbar-brand fw-bold" to="/dashboard">CRS System</Link>
+                
+                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span className="navbar-toggler-icon"></span>
+                </button>
+
+                <div className="collapse navbar-collapse" id="navbarNav">
+                    <ul className="navbar-nav me-auto">
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/dashboard">Dashboard</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/courses">All Courses</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link className="nav-link" to="/enrollments">My Enrollments</Link>
+                        </li>
+                        {/* NÚT BẤM XEM LỊCH HỌC */}
+                        <li className="nav-item">
+                            <Link className="nav-link fw-bold text-info" to="/timetable">My Timetable</Link>
+                        </li>
+                    </ul>
+                    <div className="d-flex align-items-center">
+                        <span className="text-light me-3 d-none d-lg-inline">Hi, {user?.full_name}</span>
+                        <button className="btn btn-outline-danger btn-sm" onClick={logout}>Logout</button>
+                    </div>
+                </div>
             </div>
-          </>
-          : <></>}
-      </div>
-    </nav>
-  );
+        </nav>
+    );
 };
 
-export default NavBar
+export default Navbar;

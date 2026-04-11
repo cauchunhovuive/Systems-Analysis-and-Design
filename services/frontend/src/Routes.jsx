@@ -5,31 +5,26 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
 import Enrollments from './pages/Enrollments';
-import Course from './pages/Course'; // Đã sửa tên từ CourseDetail thành Course cho khớp
+import Timetable from './pages/Timetable'; // 1. Import trang mới
 import { useAuth } from './AuthProvider';
 
 const AppRoutes = () => {
-    const { isAuthenticated, isAuthReady } = useAuth(); // Lấy isAuthenticated từ AuthProvider
+    const { isAuthenticated, isAuthReady } = useAuth();
 
-    // Đợi cho đến khi AuthProvider kiểm tra xong localStorage
-    if (!isAuthReady) {
-        return <div className="d-flex justify-content-center mt-5">Loading...</div>;
-    }
+    if (!isAuthReady) return <div className="text-center mt-5">Loading...</div>;
 
     return (
         <Routes>
-            {/* Public Routes */}
-            <Route path="/login" element={!isAuthenticated ? <Auth /> : <Navigate replace to="/dashboard" />} />
-            <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate replace to="/dashboard" />} />
-
-            {/* Private Routes - Chỉ cho vào nếu isAuthenticated là true */}
-            <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate replace to="/login" />} />
-            <Route path="/courses" element={isAuthenticated ? <Courses /> : <Navigate replace to="/login" />} />
-            <Route path="/courses/:id" element={isAuthenticated ? <Course /> : <Navigate replace to="/login" />} />
-            <Route path="/enrollments" element={isAuthenticated ? <Enrollments /> : <Navigate replace to="/login" />} />
-
-            {/* Default Route */}
-            <Route path="/" element={<Navigate replace to="/dashboard" />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={!isAuthenticated ? <Auth /> : <Navigate to="/dashboard" replace />} />
+            <Route path="/register" element={!isAuthenticated ? <Register /> : <Navigate to="/dashboard" replace />} />
+            
+            <Route path="/dashboard" element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />} />
+            <Route path="/courses" element={isAuthenticated ? <Courses /> : <Navigate to="/login" replace />} />
+            <Route path="/enrollments" element={isAuthenticated ? <Enrollments /> : <Navigate to="/login" replace />} />
+            <Route path="/timetable" element={isAuthenticated ? <Timetable /> : <Navigate to="/login" replace />} /> {/* 2. Thêm Route này */}
+            
+            <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
     );
 };

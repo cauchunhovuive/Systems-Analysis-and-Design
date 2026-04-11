@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { API_BASE_URL } from '../config/api';
 
 const Register = () => {
     const [email, setEmail] = useState('');
@@ -11,13 +12,12 @@ const Register = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         try {
-            // Gọi đến Kong Gateway port 8000
-            await axios.post('http://localhost:8000/api/auth/register', {
+            await axios.post(`${API_BASE_URL}/auth/register`, {
                 email,
                 password,
                 full_name: fullName
             });
-            alert('Đăng ký thành công! Bây giờ bạn có thể đăng nhập.');
+            alert('Đăng ký thành công! Hãy đăng nhập.');
             navigate('/login');
         } catch (err) {
             alert(err.response?.data?.message || 'Đăng ký thất bại');
@@ -28,7 +28,7 @@ const Register = () => {
         <div className="container mt-5">
             <div className="row justify-content-center">
                 <div className="col-md-6 bg-light p-5 rounded shadow">
-                    <h2 className="mb-4">Create Account</h2>
+                    <h2 className="mb-4 text-center">Create Student Account</h2>
                     <form onSubmit={handleRegister}>
                         <div className="mb-3">
                             <label className="form-label">Full Name</label>
@@ -42,7 +42,7 @@ const Register = () => {
                             <label className="form-label">Password</label>
                             <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
                         </div>
-                        <button type="submit" className="btn btn-primary w-100 mb-3">Register</button>
+                        <button type="submit" className="btn btn-success w-100 mb-3">Register</button>
                         <p className="text-center">
                             Already have an account? <Link to="/login">Login here</Link>
                         </p>

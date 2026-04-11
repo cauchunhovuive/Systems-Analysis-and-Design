@@ -1,57 +1,61 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '../AuthProvider';
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import CourseComponent from '../components/CourseComponent';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
+import toast from 'react-hot-toast'; // Import toast
 
 const Enrollments = () => {
-	const { isAuthenticated } = useAuth();
-	const getEnrollments = async () => {
-		const result = await axios.get('http://localhost:3000/api/enrollments', {
-			headers: {
-				'authorization': "Bearer " + localStorage.getItem("token")
-			}
-		});
-		return result.data;
-	}
+    const [enrollments, setEnrollments] = useState([]);
 
-	const { data: enrollments, isLoading, isError } = useQuery({
-		queryKey: ['enrollments'],
-		queryFn: getEnrollments,
-		staleTime: 15 * 60 * 1000,
-		enabled: isAuthenticated,
-		refetchOnMount: false,
-		refetchOnReconnect: false,
-		refetchOnWindowFocus: false
-	});
+    const fetchMyEnrollments = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`${API_BASE_URL}/enrollments/me`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            setEnrollments(res.data);
+        } catch (err) { console.error(err); }
+    };
 
-	if (isLoading) return <div className="p-5">Loading user data...</div>;
-	if (isError) return <div className="p-5">Error fetching user data. Please try again.</div>;
+    useEffect(() => {
+        fetchMyEnrollments();
+        const interval = setInterval(fetchMyEnrollments, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
-	return (
-		<div className="position-absolute dashboard-page w-100 p-5">
-			<div className="d-flex flex-row justify-content-between mb-5">
-				<h2 className="fw-bold dashboard">Enrollments</h2>
-				<div className='d-flex flex-row align-items-center rounded-5 search-bar p-2 w-50'>
-					<input className="form-control border-0 rounded-5 me-2" type="search" placeholder="Search enrollments" />
-					<FontAwesomeIcon icon={faMagnifyingGlass} />
-				</div>
-			</div>
-			<div>
-				{enrollments ? enrollments.map((enrollment, index) => {
-					return (
-						<>
-							<CourseComponent course={enrollment} enrollment={true} key={index} />
-							{index < enrollments.length - 1
-							? <hr />
-							: <></>}
-						</>
-					);
-				}) : <></>}
-			</div>
-		</div>
-	);
+    const handleCancel = async (courseId) => {
+        if (!window.confirm("Drop this course?")) return;
+        try {
+            const token = localStorage.getItem('token');
+            await axios.delete(`${API_BASE_URL}/enrollments/${courseId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            toast.success("Course dropped successfully!"); // Dùng toast
+            fetchMyEnrollments();
+        } catch (err) {
+            toast.error("Failed to drop course");
+        }
+    };
+
+    return (
+        <div className="container mt-4">
+            <h2 className="mb-4 fw-bold text-primary">My Schedule</h2>
+            <div className="table-responsive shadow-sm rounded">
+                <table className="table table-hover align-middle bg-white mb-0">
+                    <thead className="table-light">
+                        <tr><th>Course</th><th>Status</th><th className="text-center">Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {enrollments.map(item => (
+                            <tr key={item.id}>
+                                <td><div className="fw-bold">{item.course_name}</div><div className="small text-muted">{item.course_code}</div></td>
+                                <td><span className={`badge rounded-pill ${item.status === 'SUCCESS' ? 'bg-success' : 'bg-warning text-dark'}`}>{item.status}</span></td>
+                                <td className="text-center"><button className="btn btn-sm btn-outline-danger" onClick={() => handleCancel(item.course_id)}>Drop</button></td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
 };
-
 export default Enrollments;

@@ -1,32 +1,29 @@
-// src/routes/course.routes.js
 const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/course.controller');
-const { verifyToken, checkRole } = require('../middleware/auth.middleware');
+const authMiddleware = require('../middleware/auth.middleware');
+const roleMiddleware = require('../middleware/role.middleware');
 
-// PROTECTED ROUTE: Only Academic Office can create a course.
-router.post(
-  '/api/courses',
-  [verifyToken, checkRole(['ACADEMIC_OFFICE'])],
-  courseController.create
+// Kiểm tra kỹ: courseController.getAllCourses phải tồn tại
+router.get('/', authMiddleware, courseController.getAllCourses);
+router.get('/:id', authMiddleware, courseController.getCourseById);
+
+router.post('/', 
+    authMiddleware, 
+    roleMiddleware(['ACADEMIC_OFFICE', 'ADMIN']), 
+    courseController.createCourse
 );
 
-// PROTECTED ROUTE: Only Academic Office can update a course.
-router.put(
-  '/api/courses/:id',
-  [verifyToken, checkRole(['ACADEMIC_OFFICE'])],
-  courseController.update
+router.put('/:id', 
+    authMiddleware, 
+    roleMiddleware(['ACADEMIC_OFFICE', 'ADMIN']), 
+    courseController.updateCourse
 );
 
-// PUBLICLY ACCESSIBLE ROUTE (for logged-in users): All users can view courses.
-router.get('/api/courses', [verifyToken], courseController.getAll);
-router.get('/api/courses/:id', [verifyToken], courseController.getById);
-
-// PROTECTED ROUTE: Only Academic Office can delete a course.
-router.delete(
-  '/api/courses/:id',
-  [verifyToken, checkRole(['ACADEMIC_OFFICE'])],
-  courseController.remove
+router.delete('/:id', 
+    authMiddleware, 
+    roleMiddleware(['ACADEMIC_OFFICE', 'ADMIN']), 
+    courseController.deleteCourse
 );
 
 module.exports = router;

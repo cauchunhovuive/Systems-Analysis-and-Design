@@ -1,53 +1,51 @@
 import axios from 'axios';
 import { useState, useEffect, createContext, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from './config/api'; // Lưu ý: ở đây là ./config/api
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-	const [isAuthenticated, setIsAuthenticated] = useState(false);
-	const [isAuthReady, setIsAuthReady] = useState(false);
-	const navigate = useNavigate();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthReady, setIsAuthReady] = useState(false);
+    const [user, setUser] = useState(null);
 
-	useEffect(() => {
-		const token = localStorage.getItem('token');
-		setIsAuthenticated(!!token);
-		setIsAuthReady(true);
-	}, []);
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const savedUser = localStorage.getItem('user');
+        if (token && savedUser) {
+            setIsAuthenticated(true);
+            setUser(JSON.parse(savedUser));
+        }
+        setIsAuthReady(true);
+    }, []);
 
-	const handleLogIn = (data) => {
-		axios
-			.post('http://localhost:8000/api/auth/login', data)
-			.then((response) => {
-				const token = response.data.token
-				if (token) {
-					localStorage.setItem("token", token);
-					setIsAuthenticated(true);
-					navigate(`/`);
-				}
-				else {
-					alert("Login unsucessful");
-				}
-			})
-			.catch((err) => {
-				console.error(err);
-				alert(err);
-			})
-	};
+    const handleLogIn = async (credentials) => {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
+            const { token, user: userData } = response.data;
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(userData));
+            setIsAuthenticated(true);
+            setUser(userData);
+            window.location.href = '/dashboard';
+        } catch (err) {
+            alert(err.response?.data?.message || "Đăng nhập thất bại");
+        }
+    };
 
-	const handleLogout = () => {
-		localStorage.removeItem("token");
-		setIsAuthenticated(false);
-		navigate('/');
-	};
+    const logout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setIsAuthenticated(false);
+        setUser(null);
+        window.location.href = '/login';
+    };
 
-	return (
-		<AuthContext.Provider value={{ isAuthenticated, isAuthReady, handleLogIn, handleLogout }}>
-			{children}
-		</AuthContext.Provider>
-	);
+    return (
+        <AuthContext.Provider value={{ isAuthenticated, isAuthReady, user, handleLogIn, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
-export const useAuth = () => {
-	return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);
