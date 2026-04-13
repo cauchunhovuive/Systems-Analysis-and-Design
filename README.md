@@ -115,5 +115,3 @@ docker-compose up -d --build
 ```
 
 ---
-
-*Dự án được phát triển bởi Bùi Đức Mạnh.*
