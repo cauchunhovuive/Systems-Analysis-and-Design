@@ -3,13 +3,13 @@
 ## 📋 THÔNG TIN NHÓM
 
 ### Thành viên
-- **Thành viên 1:** Bùi Đức Mạnh - `[MSSV]`
-- **Thành viên 2:** `[Họ tên]` - `[MSSV]`
-- **Thành viên 3:** `[Họ tên]` - `[MSSV]`
-- **Thành viên 4:** `[Họ tên]` - `[MSSV]`
+- **Thành viên 1:** Bùi Đức Mạnh - 23001025
+- **Thành viên 2:** Nguyễn Di Phi - 23001305
+- **Thành viên 3:** Hồ Long Giang - 23694641
+- **Thành viên 4:** Nguyễn Tuấn Phát - 22000625
 
 ### Repository
-🔗 **Git Repository:** [https://github.com/buidwcmah21/CRS.git](https://github.com/buidwcmah21/CRS.git)
+🔗 **Git Repository:** (https://github.com/cauchunhovuive/Systems-Analysis-and-Design)
 
 > **⚠️ Lưu ý:** Repository được tạo một lần duy nhất. Các thay đổi về link repo sẽ bị trừ điểm.
 
