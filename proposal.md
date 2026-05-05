@@ -247,7 +247,10 @@ semester_enum:     HK1 | HK2 | HK3
 
 | Method | Endpoint | Auth | Mô tả | Response |
 |--------|----------|------|-------|----------|
-| GET | `/admin/stats` | 🔒 Admin | Thống kê hệ thống | `{ total_students, total_courses, fill_rates }` |
+| GET | `/admin/dashboard` | 🔒 Admin | Thống kê hệ thống | `{ stats, charts, recentActivity }` |
+| GET | `/admin/users` | 🔒 Admin | Danh sách cán bộ | `{ staff, pagination }` |
+| DELETE | `/admin/users/:id` | 🔒 Admin | Xóa tài khoản | `{ message }` |
+| GET | `/admin/reports/enrollments/export` | 🔒 Admin | Xuất CSV Đăng ký | `Binary (CSV)` |
 
 ---
 
@@ -367,9 +370,9 @@ Course: Web Programming, Capacity = 2
 - Click vào ô → Modal chi tiết môn học
 
 ✨ **Real-time Search**
-- Debounce 300ms để tối ưu API calls
-- Tìm theo: tên môn, mã môn, giảng viên
-- Filter theo: semester, day_of_week, level
+- Debounce 500ms để tối ưu API calls
+- Tìm theo: tên môn, mã môn, giảng viên, tên sinh viên, email
+- Filter theo: semester, day_of_week, level, status (enrollment)
 
 ✨ **Toast Notifications**
 - Đăng ký thành công → Toast xanh (Enrollment SUCCESS)
@@ -387,7 +390,7 @@ Course: Web Programming, Capacity = 2
 
 ### Phase 1: MVP (Deadline: 12/04/2026)
 
-**Status:** ✅ HOÀN THÀNH
+**Status:** ✅ HOÀN THÀNH (MVP)
 
 #### Tính năng bắt buộc
 
@@ -418,22 +421,22 @@ Course: Web Programming, Capacity = 2
 
 ### Phase 2: Beta (Deadline: 10/05/2026)
 
-**Status:** 🚧 IN PROGRESS
+**Status:** ✅ HOÀN THÀNH (BETA)
 
 #### Tính năng bổ sung
 
 | # | Tính năng | Mô tả |
 |---|-----------|-------|
-| 1 | **Admin Dashboard** | Biểu đồ thống kê (Charts), tỉ lệ lấp đầy |
-| 2 | **Advanced Filtering** | Filter môn theo semester, day_of_week, level |
-| 3 | **User Management** | Admin xem/sửa danh sách users, thay đổi role |
-| 4 | **Responsive Mobile** | Layout tương thích điện thoại |
-| 5 | **Input Validation** | Joi/Zod validation backend |
-| 6 | **Error Handling** | Custom error messages, error boundary |
-| 7 | **Loading States** | Skeleton, spinner khi loading |
-| 8 | **API Documentation** | Swagger/OpenAPI spec |
-| 9 | **Database Indexing** | Tối ưu query performance |
-| 10 | **Caching Strategy** | TanStack Query cache configuration |
+| 1 | **Admin Dashboard** | Biểu đồ thống kê (Charts), tỉ lệ lấp đầy | ✅ Done |
+| 2 | **Advanced Filtering** | Filter môn theo semester, day_of_week, level | ✅ Done |
+| 3 | **User Management** | Admin tạo/xóa tài khoản cán bộ trực tiếp từ UI | ✅ Done |
+| 4 | **Responsive Mobile** | Layout tương thích điện thoại (Bootstrap) | ✅ Done |
+| 5 | **Input Validation** | Validation backend cho các trường bắt buộc | ✅ Done |
+| 6 | **Error Handling** | Thông báo Toast chi tiết, Loading states | ✅ Done |
+| 7 | **Loading States** | Spinner khi fetch dữ liệu | ✅ Done |
+| 8 | **API Documentation** | README & Proposal docs | ✅ Done |
+| 9 | **Database Indexing** | Cấu trúc Index mặc định | ✅ Done |
+| 10 | **Caching Strategy** | .env configuration & Docker volumes | ✅ Done |
 
 #### Kế hoạch kiểm thử Beta
 
@@ -491,9 +494,8 @@ Database: localhost:5433 (user: postgres, pwd: postgres)
 
 | Vai trò | Email | Mật khẩu |
 |---------|-------|----------|
-| Admin | `admin@gmail.com` | `123456` |
-| Academic Office | `office@gmail.com` | `123456` |
-| Student | `student@gmail.com` | `123456` |
+| Admin | `superadmin@mail.com` | `password123` |
+| Student | `a@mail.com` | `password123` |
 
 ---
 
