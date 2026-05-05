@@ -1,0 +1,14 @@
+# kong.yml
+_format_version: "3.0"
+
+services:
+  - name: crs-backend-service
+    url: http://backend-app:3000
+    connect_timeout: 60000
+    write_timeout: 60000
+    read_timeout: 60000
+    routes:
+      - name: crs-api-routes
+        paths:
+          - /api
+        strip_path: false
