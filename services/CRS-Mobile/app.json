@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "CRS Portal",
+    "slug": "crs-portal",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "crsportal",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "edu.crs.portal"
+    },
+    "android": {
+      "package": "edu.crs.portal"
+    },
+    "plugins": ["expo-router"]
+  }
+}
