@@ -1,6 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthProvider';
 import { useState } from 'react';
+import Notifications from './Notifications';
+import AIChat from './AIChat';
 
 const NavBar = ({ state }) => {
   const location = useLocation();
@@ -68,41 +70,63 @@ const NavBar = ({ state }) => {
           </ul>
           
           <div className="d-flex align-items-center gap-4 mt-3 mt-lg-0 justify-content-center">
-            <div className="position-relative" style={{cursor: 'pointer'}}>
-              <i className="bi bi-bell fs-5 text-secondary hover-text-primary transition-all"></i>
-              <span className="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                <span className="visually-hidden">New alerts</span>
-              </span>
-            </div>
-            <i className="bi bi-chat-dots fs-5 text-secondary hover-text-primary transition-all" style={{cursor: 'pointer'}}></i>
-            
-            <div className="dropdown">
-              <div 
-                className="d-flex align-items-center gap-2" 
-                role="button" 
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                aria-expanded={dropdownOpen}
-                style={{cursor: 'pointer'}}
-              >
-                <div className="bg-light rounded-circle d-flex align-items-center justify-content-center border" style={{width: '38px', height: '38px'}}>
-                   <i className="bi bi-person-fill text-primary fs-5"></i>
-                </div>
-                <i className="bi bi-chevron-down text-secondary small"></i>
-              </div>
-              <ul className={`dropdown-menu dropdown-menu-end shadow border-0 mt-2 ${dropdownOpen ? 'show' : ''}`} style={{ position: 'absolute' }}>
-                <li><h6 className="dropdown-header">Tài khoản của tôi</h6></li>
-                <li>
-                  <Link className="dropdown-item d-flex align-items-center gap-2 fw-semibold" to="/profile" onClick={() => setDropdownOpen(false)}>
-                    <i className="bi bi-person-badge"></i> Hồ sơ cá nhân
-                  </Link>
-                </li>
-                <li><hr className="dropdown-divider" /></li>
-                <li><button className="dropdown-item text-danger fw-semibold d-flex align-items-center gap-2" onClick={handleLogout}>
-                    <i className="bi bi-box-arrow-right"></i> Đăng xuất
-                </button></li>
-              </ul>
-            </div>
-          </div>
+  <Notifications />
+
+  <AIChat />
+
+  <div className="dropdown">
+    <div
+      className="d-flex align-items-center gap-2"
+      role="button"
+      onClick={() => setDropdownOpen(!dropdownOpen)}
+      aria-expanded={dropdownOpen}
+      style={{ cursor: 'pointer' }}
+    >
+      <div
+        className="bg-light rounded-circle d-flex align-items-center justify-content-center border"
+        style={{ width: '38px', height: '38px' }}
+      >
+        <i className="bi bi-person-fill text-primary fs-5"></i>
+      </div>
+
+      <i className="bi bi-chevron-down text-secondary small"></i>
+    </div>
+
+    <ul
+      className={`dropdown-menu dropdown-menu-end shadow border-0 mt-2 ${dropdownOpen ? 'show' : ''}`}
+      style={{ position: 'absolute' }}
+    >
+      <li>
+        <h6 className="dropdown-header">Tài khoản của tôi</h6>
+      </li>
+
+      <li>
+        <Link
+          className="dropdown-item d-flex align-items-center gap-2 fw-semibold"
+          to="/profile"
+          onClick={() => setDropdownOpen(false)}
+        >
+          <i className="bi bi-person-badge"></i>
+          Hồ sơ cá nhân
+        </Link>
+      </li>
+
+      <li>
+        <hr className="dropdown-divider" />
+      </li>
+
+      <li>
+        <button
+          className="dropdown-item text-danger fw-semibold d-flex align-items-center gap-2"
+          onClick={handleLogout}
+        >
+          <i className="bi bi-box-arrow-right"></i>
+          Đăng xuất
+        </button>
+      </li>
+    </ul>
+  </div>
+</div>
         </div>
       </div>
     </nav>

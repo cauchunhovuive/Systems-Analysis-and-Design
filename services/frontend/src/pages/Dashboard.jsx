@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from '../config/api';
@@ -6,7 +6,7 @@ import { useAuth } from '../AuthProvider';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, handleLogout } = useAuth();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -14,14 +14,15 @@ const Dashboard = () => {
   }, [navigate, isAuthenticated]);
 
   const getUser = async () => {
-		const result = await apiClient.get('/user');
-		return result.data.user;
-	};
+    const result = await apiClient.get('/auth/user');
+    if (!result.data || !result.data.user) throw new Error('User data not found');
+    return result.data.user;
+  };
 
-	const getEnrollments = async () => {
-		const result = await apiClient.get('/enrollments');
-		return result.data.filter(e => e.status === 'SUCCESS');
-	};
+  const getEnrollments = async () => {
+    const result = await apiClient.get('/enrollments');
+    return (result.data || []).filter(e => e.status === 'SUCCESS');
+  };
 
   const { data: user, isLoading: isUserLoading, isError: isUserError } = useQuery({
     queryKey: ['user'],
@@ -30,27 +31,28 @@ const Dashboard = () => {
     retry: false
   });
 
-  const { data: enrollments, isLoading: isEnrollmentsLoading } = useQuery({
+  const { data: enrollments = [], isLoading: isEnrollmentsLoading } = useQuery({
     queryKey: ['enrollments'],
     queryFn: getEnrollments,
     enabled: isAuthenticated
   });
 
-  const { handleLogout } = useAuth();
-
-  const TOTAL_CREDITS = 162;
+  // ── Tính tiến độ từ credit thực tế ──────────────────────────────────────
+  const TOTAL_CREDITS    = 162;
   const REQUIRED_CREDITS = 120;
   const ELECTIVE_CREDITS = 42;
-  const DEFAULT_CREDIT_PER_COURSE = 3;
-  const completedCredits = enrollments?.length ? enrollments.length * DEFAULT_CREDIT_PER_COURSE : 0;
-  const progressPercent = Math.min(100, Math.round((completedCredits / TOTAL_CREDITS) * 100));
-  const completedRequiredCredits = 0;
-  const completedElectiveCredits = 0;
+  const PRICE_PER_CREDIT = 800_000;
+
+  const completedCredits = enrollments.reduce((s, e) => s + (e.credit || 0), 0);
+  const progressPercent  = Math.min(100, Math.round((completedCredits / TOTAL_CREDITS) * 100));
+
+  const completedRequiredCredits = enrollments.reduce((s, e) =>
+    s + (e.course_type?.trim() === 'Bắt buộc' ? (e.credit || 0) : 0), 0);
+  const completedElectiveCredits = enrollments.reduce((s, e) =>
+    s + (e.course_type?.trim() !== 'Bắt buộc' ? (e.credit || 0) : 0), 0);
 
   useEffect(() => {
-    if (isUserError) {
-        handleLogout();
-    }
+    if (isUserError) handleLogout();
   }, [isUserError, handleLogout]);
 
   if (isUserLoading || isEnrollmentsLoading || (!user && !isUserError)) {
@@ -67,14 +69,17 @@ const Dashboard = () => {
 
   return (
     <div className="container py-5" style={{marginTop: '60px', maxWidth: '1200px'}}>
-      
-      {/* Row 1: Thong tin sinh vien & Nhac nho */}
+
+      {/* Row 1: Thông tin sinh viên & Nhắc nhở */}
       <div className="row g-4 mb-4">
-        {/* Info Card */}
         <div className="col-lg-8">
           <div className="portal-card h-100 d-flex align-items-center">
             <div className="me-4 d-none d-sm-block">
-              <img src={`https://ui-avatars.com/api/?name=${user.fullName}&background=1e3a8a&color=fff&size=128&font-size=0.4`} alt="Avatar" className="portal-avatar shadow-sm" />
+              <img
+                src={`https://ui-avatars.com/api/?name=${user.fullName}&background=1e3a8a&color=fff&size=128&font-size=0.4`}
+                alt="Avatar"
+                className="portal-avatar shadow-sm"
+              />
             </div>
             <div className="w-100">
               <h5 className="fw-bold mb-3 border-bottom pb-2" style={{color: 'var(--color-primary)'}}>
@@ -100,9 +105,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Notifications & Stats */}
         <div className="col-lg-4 d-flex flex-column gap-3">
-          <div className="portal-card flex-fill d-flex justify-content-between align-items-center" style={{backgroundColor: '#fff', borderLeft: '4px solid #f59e0b'}}>
+          <div className="portal-card flex-fill d-flex justify-content-between align-items-center" style={{borderLeft: '4px solid #f59e0b'}}>
             <div>
               <p className="text-muted mb-1 fw-bold small text-uppercase">Nhắc nhở mới</p>
               <h2 className="mb-0 fw-bold" style={{color: '#f59e0b'}}>0</h2>
@@ -114,7 +118,7 @@ const Dashboard = () => {
           <div className="portal-card flex-fill d-flex justify-content-between align-items-center" style={{backgroundColor: '#eff6ff', borderColor: '#bfdbfe', borderLeft: '4px solid #3b82f6'}}>
             <div>
               <p className="text-primary mb-1 fw-bold small text-uppercase">Lớp học phần (HK này)</p>
-              <h2 className="mb-0 text-primary fw-bold">{enrollments?.length || 0}</h2>
+              <h2 className="mb-0 text-primary fw-bold">{enrollments.length}</h2>
             </div>
             <div className="bg-white rounded-circle p-3 shadow-sm">
               <i className="bi bi-journal-bookmark-fill fs-4 text-primary"></i>
@@ -143,8 +147,9 @@ const Dashboard = () => {
             <span className="fw-bold small text-center mt-1">Kết quả đăng ký</span>
           </div>
         </div>
+        {/* ✅ Fix: navigate đến /tuition */}
         <div className="col-6 col-md-3">
-          <div className="action-btn">
+          <div className="action-btn" onClick={() => navigate('/tuition')}>
             <i className="bi bi-wallet2 action-icon"></i>
             <span className="fw-bold small text-center mt-1">Tra cứu học phí</span>
           </div>
@@ -159,8 +164,8 @@ const Dashboard = () => {
               <h5 className="fw-bold mb-0">Lớp học phần đang học</h5>
               <span className="badge bg-light text-dark border">HK2 (2025-2026)</span>
             </div>
-            
-            {enrollments && enrollments.length > 0 ? (
+
+            {enrollments.length > 0 ? (
               <div className="table-responsive">
                 <table className="table table-hover align-middle">
                   <thead className="table-light">
@@ -178,8 +183,8 @@ const Dashboard = () => {
                         <td className="fw-bold text-dark">{course.course_name}</td>
                         <td className="text-muted small">{course.lecturer_name}</td>
                         <td className="text-center">
-                          <span className="badge bg-light text-dark border me-1">{course.day_of_week.substring(0,3)}</span> 
-                          <small className="fw-semibold text-muted">{course.start_time.substring(0,5)}</small>
+                          <span className="badge bg-light text-dark border me-1">{course.day_of_week?.substring(0,3)}</span>
+                          <small className="fw-semibold text-muted">{course.start_time?.substring(0,5)}</small>
                         </td>
                       </tr>
                     ))}
@@ -197,50 +202,80 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        
+
+        {/* Tiến độ học tập — tính từ credit thực tế */}
         <div className="col-lg-4">
           <div className="portal-card h-100 text-center">
-             <h5 className="fw-bold mb-4 border-bottom pb-3 text-start">Tiến độ học tập</h5>
-             
-             {/* Circular Progress Chart */}
-             <div className="position-relative d-inline-block mt-4 mb-3" style={{width: '200px', height: '200px'}}>
-                <svg viewBox="0 0 36 36" className="w-100 h-100">
-                  {/* Background Circle */}
-                  <path
-                    className="text-light"
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#f3f4f6"
-                    strokeWidth="3.5"
-                  />
-                  {/* Foreground Circle */}
-                  <path
-                    className="text-primary"
-                    strokeDasharray={`${progressPercent}, 100`}
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="var(--color-primary-light)"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    style={{animation: 'progress 1.5s ease-out forwards'}}
-                  />
-                </svg>
-                <div className="position-absolute top-50 start-50 translate-middle text-center w-100">
-                  <h2 className="mb-0 fw-bold" style={{color: 'var(--color-primary)'}}>{`${completedCredits}/${TOTAL_CREDITS}`}</h2>
-                  <span className="text-muted small fw-semibold">Tín chỉ</span>
+            <h5 className="fw-bold mb-4 border-bottom pb-3 text-start">Tiến độ học tập</h5>
+
+            <div className="position-relative d-inline-block mt-4 mb-3" style={{width: '200px', height: '200px'}}>
+              <svg viewBox="0 0 36 36" className="w-100 h-100">
+                <path
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none" stroke="#f3f4f6" strokeWidth="3.5"
+                />
+                <path
+                  strokeDasharray={`${progressPercent}, 100`}
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke={progressPercent >= 50 ? 'var(--color-primary)' : progressPercent >= 20 ? '#f59e0b' : '#ef4444'}
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  style={{animation: 'progress 1.5s ease-out forwards'}}
+                />
+              </svg>
+              <div className="position-absolute top-50 start-50 translate-middle text-center w-100">
+                <h2 className="mb-0 fw-bold" style={{color: 'var(--color-primary)'}}>
+                  {completedCredits}/{TOTAL_CREDITS}
+                </h2>
+                <span className="text-muted small fw-semibold">Tín chỉ</span>
+              </div>
+            </div>
+
+            <p className="text-muted small mb-3">{progressPercent}% hoàn thành</p>
+
+            {/* Mini bars */}
+            <div className="px-2 text-start">
+              <div className="mb-3">
+                <div className="d-flex justify-content-between mb-1">
+                  <span className="small text-muted fw-bold">Bắt buộc</span>
+                  <span className="small fw-bold text-primary">{completedRequiredCredits}/{REQUIRED_CREDITS}</span>
                 </div>
-             </div>
-             
-             <div className="d-flex justify-content-between px-3 mt-4 text-start">
-               <div>
-                 <p className="mb-1 text-muted small fw-bold">Bắt buộc</p>
-                 <p className="fw-bold text-dark mb-0">{`${completedRequiredCredits} / ${REQUIRED_CREDITS}`}</p>
-               </div>
-               <div className="text-end">
-                 <p className="mb-1 text-muted small fw-bold">Tự chọn</p>
-                 <p className="fw-bold text-dark mb-0">{`${completedElectiveCredits} / ${ELECTIVE_CREDITS}`}</p>
-               </div>
-             </div>
+                <div className="progress" style={{height: '6px'}}>
+                  <div
+                    className="progress-bar"
+                    style={{
+                      width: `${Math.min(100, Math.round(completedRequiredCredits / REQUIRED_CREDITS * 100))}%`,
+                      backgroundColor: 'var(--color-primary)'
+                    }}
+                  />
+                </div>
+              </div>
+              <div>
+                <div className="d-flex justify-content-between mb-1">
+                  <span className="small text-muted fw-bold">Tự chọn</span>
+                  <span className="small fw-bold" style={{color: '#f59e0b'}}>{completedElectiveCredits}/{ELECTIVE_CREDITS}</span>
+                </div>
+                <div className="progress" style={{height: '6px'}}>
+                  <div
+                    className="progress-bar"
+                    style={{
+                      width: `${Math.min(100, Math.round(completedElectiveCredits / ELECTIVE_CREDITS * 100))}%`,
+                      backgroundColor: '#f59e0b'
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Shortcut học phí */}
+            <button
+              className="btn btn-outline-primary btn-sm mt-4 w-100"
+              onClick={() => navigate('/tuition')}
+            >
+              <i className="bi bi-wallet2 me-1" />
+              Xem học phí ({new Intl.NumberFormat('vi-VN').format(completedCredits * PRICE_PER_CREDIT)} ₫)
+            </button>
           </div>
         </div>
       </div>

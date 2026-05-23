@@ -48,6 +48,27 @@ const getUser = async (req, res) => {
   }
 }
 
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const payload = {
+      fullName: req.body.fullName || req.body.full_name,
+      phone: req.body.phone,
+      address: req.body.address,
+      dob: req.body.dob
+    };
+
+    const updatedUser = await authService.updateUserProfile(userId, payload);
+    res.status(200).json({ user: updatedUser, message: 'Cập nhật hồ sơ thành công' });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
+
 const registerStudent = async (req, res) => {
   try {
     // Note: We map full_name to fullName here to support frontend format
@@ -71,5 +92,6 @@ module.exports = {
   register,
   registerStudent,
   login,
-  getUser
+  getUser,
+  updateUser
 };

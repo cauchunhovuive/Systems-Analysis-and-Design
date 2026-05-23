@@ -11,6 +11,38 @@ const findByEmail = async (email) => {
   return rows[0];
 };
 
+const findById = async (id) => {
+  const { rows } = await db.query('SELECT * FROM users WHERE id = $1', [id]);
+  return rows[0];
+};
+
+const updateUserProfile = async (userId, data) => {
+  const allowed = ['full_name', 'phone', 'address', 'dob'];
+  const sets = [];
+  const vals = [];
+  let i = 1;
+
+  for (const key of allowed) {
+    if (data[key] !== undefined) {
+      sets.push(`${key}=$${i}`);
+      vals.push(data[key]);
+      i++;
+    }
+  }
+
+  if (!sets.length) {
+    return findById(userId);
+  }
+
+  vals.push(userId);
+  const { rows } = await db.query(
+    `UPDATE users SET ${sets.join(', ')} WHERE id=$${i} RETURNING *`,
+    vals
+  );
+
+  return rows[0];
+};
+
 /**
  * Creates a new user in the database.
  * @param {string} email
@@ -29,5 +61,7 @@ const createUser = async (email, passwordHash, fullName, role) => {
 
 module.exports = {
   findByEmail,
+  findById,
   createUser,
+  updateUserProfile,
 };

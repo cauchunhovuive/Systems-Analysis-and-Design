@@ -7,6 +7,7 @@ import Register from "./pages/Register";
 import Timetable from "./pages/Timetable";
 import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
+import Tuition from "./pages/Tuition";
 
 const routes = [
 	{ path: "/login", page: Auth },
@@ -18,6 +19,8 @@ const routes = [
 	{ path: "/timetable", page: Timetable },
 	{ path: "/profile", page: Profile },
 	{ path: "/admin", page: AdminDashboard },
+	{ path: "/tuition", page: Tuition },
+
 ];
 
 export { routes };

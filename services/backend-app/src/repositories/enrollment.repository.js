@@ -48,7 +48,7 @@ const findByStudentAndCourse = async (studentId, courseId) => {
 const findCoursesByStudentId = async (studentId) => {
   const { rows } = await db.query(
     `SELECT 
-     c.id, c.course_code, c.course_name, c.group_code, c.lecturer_name, c.level, c.day_of_week, c.start_time, c.end_time, c.semester, e.status
+     c.id, c.course_code, c.course_name, c.group_code, c.lecturer_name, c.level, c.day_of_week, c.start_time, c.end_time, c.semester, c.credit, c.course_type, e.status
      FROM enrollments e
      JOIN courses c ON e.course_id = c.id
      WHERE e.student_id = $1`,

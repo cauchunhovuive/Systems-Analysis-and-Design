@@ -39,6 +39,12 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="tuition"
+        options={{
+          tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="Học phí" icon="💰" />,
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           tabBarIcon: ({ focused }) => <TabIcon focused={focused} label="Hồ sơ" icon="👤" />,

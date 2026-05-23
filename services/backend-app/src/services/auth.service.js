@@ -66,14 +66,39 @@ const getUser = async (token) => {
       // Generic error to prevent user enumeration
       throw new Error('Invalid user');
     }
-    return { user: { id: user.id, email: user.email, fullName: user.full_name, role: user.role } };
+    return { user: { id: user.id, email: user.email, fullName: user.full_name, role: user.role, phone: user.phone, address: user.address, dob: user.dob, created_at: user.created_at } };
   } catch (err) {
     throw new Error(err.message);
   }
 };
 
+const updateUserProfile = async (userId, data) => {
+  const user = await userRepository.updateUserProfile(userId, {
+    full_name: data.fullName,
+    phone: data.phone,
+    address: data.address,
+    dob: data.dob
+  });
+
+  if (!user) {
+    throw new Error('Không tìm thấy người dùng');
+  }
+
+  return {
+    id: user.id,
+    email: user.email,
+    fullName: user.full_name,
+    role: user.role,
+    phone: user.phone,
+    address: user.address,
+    dob: user.dob,
+    created_at: user.created_at
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
-  getUser
+  getUser,
+  updateUserProfile
 };

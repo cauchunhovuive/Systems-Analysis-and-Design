@@ -102,9 +102,8 @@ services:
       - "5433:5432"
     volumes:
       # =================================================================
-      # THE FIX IS HERE:
-      # Mount our SQL script into the special init directory.
-      # The Postgres container will automatically run this script when it creates the database.
+      # Persist Postgres data and mount our init SQL script.
+      - postgres-data:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d
       # =================================================================
     restart: on-failure
@@ -121,6 +120,7 @@ services:
 # -----------------------------------------------------------------------------
 volumes:
   kong-data:
+  postgres-data:
 
 networks:
   crs-network:

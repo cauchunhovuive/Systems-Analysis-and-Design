@@ -46,8 +46,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateUser = async (newUser) => {
+    try {
+      await AsyncStorage.setItem('user', JSON.stringify(newUser));
+      setUser(newUser);
+    } catch (e) {
+      console.log('Error updating user in storage:', e);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

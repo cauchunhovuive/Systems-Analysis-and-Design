@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 				localStorage.removeItem('user');
 			}
 
-			apiClient.get('/user')
+			apiClient.get('/auth/user')
 				.then((response) => {
 					setUser(response.data.user);
 					setIsAuthenticated(true);
@@ -78,8 +78,13 @@ export const AuthProvider = ({ children }) => {
 		navigate('/login');
 	};
 
+	const updateUser = (userData) => {
+		setUser(userData);
+		localStorage.setItem('user', JSON.stringify(userData));
+	};
+
 	return (
-		<AuthContext.Provider value={{ isAuthenticated, isAuthReady, user, handleLogIn, handleLogout }}>
+		<AuthContext.Provider value={{ isAuthenticated, isAuthReady, user, handleLogIn, handleLogout, updateUser }}>
 			{children}
 		</AuthContext.Provider>
 	);

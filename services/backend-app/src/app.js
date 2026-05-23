@@ -51,7 +51,7 @@ app.get('/api/test-courses', (req, res) => {
 });
 
 // Use the routers with a base path
-app.use('/api', authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api', courseRoutes);
 app.use('/api', enrollmentRoutes);
 app.use('/api', adminRoutes);

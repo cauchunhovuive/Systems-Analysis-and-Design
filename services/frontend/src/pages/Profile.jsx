@@ -1,12 +1,17 @@
-import React, { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../config/api';
 
 const Profile = () => {
-    const { isAuthenticated, isAuthReady } = useAuth();
+    const { isAuthenticated, isAuthReady, handleLogout, updateUser } = useAuth();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
+    const [editMode, setEditMode] = useState(false);
+    const [successMsg, setSuccessMsg] = useState('');
+    const [errorMsg, setErrorMsg] = useState('');
+    const [formData, setFormData] = useState({ fullName: '', address: '', phone: '', dob: '' });
 
     useEffect(() => {
         if (isAuthReady && !isAuthenticated) {
@@ -15,7 +20,10 @@ const Profile = () => {
     }, [isAuthReady, isAuthenticated, navigate]);
 
     const getUser = async () => {
-		const result = await apiClient.get('/user');
+		const result = await apiClient.get('/auth/user');
+		if (!result.data || !result.data.user) {
+			throw new Error('User data not found');
+		}
 		return result.data.user;
     };
 
@@ -26,13 +34,58 @@ const Profile = () => {
         retry: false
     });
 
-    const { handleLogout } = useAuth();
-
     React.useEffect(() => {
         if (isError) {
             handleLogout();
         }
     }, [isError, handleLogout]);
+
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                fullName: user.fullName || '',
+                address: user.address || '',
+                phone: user.phone || '',
+                dob: user.dob ? user.dob.slice(0, 10) : ''
+            });
+        }
+    }, [user]);
+
+    const handleSave = async () => {
+        setErrorMsg('');
+        setSuccessMsg('');
+
+        try {
+            const response = await apiClient.put('/auth/user', {
+                full_name: formData.fullName,
+                phone: formData.phone,
+                address: formData.address,
+                dob: formData.dob || null
+            });
+
+            const updatedUser = response.data.user;
+            queryClient.setQueryData(['user'], updatedUser);
+            updateUser(updatedUser);
+            setSuccessMsg('Cập nhật hồ sơ thành công');
+            setEditMode(false);
+        } catch (err) {
+            setErrorMsg(err.response?.data?.message || 'Cập nhật không thành công');
+        }
+    };
+
+    const handleCancel = () => {
+        if (user) {
+            setFormData({
+                fullName: user.fullName || '',
+                address: user.address || '',
+                phone: user.phone || '',
+                dob: user.dob ? user.dob.slice(0, 10) : ''
+            });
+        }
+        setErrorMsg('');
+        setSuccessMsg('');
+        setEditMode(false);
+    };
 
     if (isLoading || (!user && !isError)) return (
         <div className="min-vh-100 d-flex justify-content-center align-items-center">
@@ -71,19 +124,66 @@ const Profile = () => {
                     <h5 className="fw-bold mb-4 text-dark"><i className="bi bi-person-lines-fill me-2 text-primary"></i>Thông tin liên hệ</h5>
                     
                     <div className="row g-4">
+                        <div className="col-12">
+                            <label className="text-muted small fw-bold mb-1">Họ và tên</label>
+                            {editMode ? (
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={formData.fullName}
+                                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                    placeholder="Nhập họ và tên"
+                                />
+                            ) : (
+                                <p className="fw-semibold text-dark border p-2 rounded bg-light">{user.fullName}</p>
+                            )}
+                        </div>
+                        <div className="col-12">
+                            <label className="text-muted small fw-bold mb-1">Email</label>
+                            <p className="fw-semibold text-dark border p-2 rounded bg-light">{user.email}</p>
+                        </div>
                         <div className="col-md-6">
                             <label className="text-muted small fw-bold mb-1">Địa chỉ</label>
-                            <p className="fw-semibold text-dark border p-2 rounded bg-light">{user.address || 'Chưa cập nhật'}</p>
+                            {editMode ? (
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={formData.address}
+                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                    placeholder="Nhập địa chỉ"
+                                />
+                            ) : (
+                                <p className="fw-semibold text-dark border p-2 rounded bg-light">{user.address || 'Chưa cập nhật'}</p>
+                            )}
                         </div>
                         <div className="col-md-6">
                             <label className="text-muted small fw-bold mb-1">Số điện thoại</label>
-                            <p className="fw-semibold text-dark border p-2 rounded bg-light">{user.phone || 'Chưa cập nhật'}</p>
+                            {editMode ? (
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    placeholder="Nhập số điện thoại"
+                                />
+                            ) : (
+                                <p className="fw-semibold text-dark border p-2 rounded bg-light">{user.phone || 'Chưa cập nhật'}</p>
+                            )}
                         </div>
                         <div className="col-md-6">
                             <label className="text-muted small fw-bold mb-1">Ngày sinh</label>
-                            <p className="fw-semibold text-dark border p-2 rounded bg-light">
-                                {user.dob ? new Date(user.dob).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}
-                            </p>
+                            {editMode ? (
+                                <input
+                                    type="date"
+                                    className="form-control"
+                                    value={formData.dob}
+                                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+                                />
+                            ) : (
+                                <p className="fw-semibold text-dark border p-2 rounded bg-light">
+                                    {user.dob ? new Date(user.dob).toLocaleDateString('vi-VN') : 'Chưa cập nhật'}
+                                </p>
+                            )}
                         </div>
                         <div className="col-md-6">
                             <label className="text-muted small fw-bold mb-1">Ngày tham gia hệ thống</label>
@@ -95,10 +195,23 @@ const Profile = () => {
                 </div>
             </div>
             
+            {errorMsg && <div className="alert alert-danger py-2 small fw-semibold text-center">{errorMsg}</div>}
+            {successMsg && <div className="alert alert-success py-2 small fw-semibold text-center">{successMsg}</div>}
             <div className="text-center">
-                <button className="btn btn-outline-primary fw-bold px-4 py-2" onClick={() => alert('Tính năng cập nhật hồ sơ đang được phát triển!')}>
-                    <i className="bi bi-pencil-square me-2"></i>Chỉnh sửa hồ sơ
-                </button>
+                {editMode ? (
+                    <>
+                        <button className="btn btn-primary fw-bold px-4 py-2 me-3" onClick={handleSave}>
+                            <i className="bi bi-save me-2"></i>Lưu thay đổi
+                        </button>
+                        <button className="btn btn-outline-secondary fw-bold px-4 py-2" onClick={handleCancel}>
+                            Hủy
+                        </button>
+                    </>
+                ) : (
+                    <button className="btn btn-outline-primary fw-bold px-4 py-2" onClick={() => setEditMode(true)}>
+                        <i className="bi bi-pencil-square me-2"></i>Chỉnh sửa hồ sơ
+                    </button>
+                )}
             </div>
         </div>
     );

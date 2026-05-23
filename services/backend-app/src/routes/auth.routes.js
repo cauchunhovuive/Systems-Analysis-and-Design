@@ -14,5 +14,6 @@ router.post('/register/student', authController.registerStudent);
 router.post('/login', authController.login);
 
 router.get('/user', verifyToken, authController.getUser);
+router.put('/user', verifyToken, authController.updateUser);
 
 module.exports = router;
