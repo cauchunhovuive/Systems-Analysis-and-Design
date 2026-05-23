@@ -49,6 +49,11 @@ Hệ thống vừa được nâng cấp với các tính năng vượt trội:
     POSTGRES_USER=admin
     POSTGRES_PASSWORD=password123
     POSTGRES_DB=crs_db
+    DB_USER=admin
+    DB_PASSWORD=password123
+    DB_HOST=postgres-db
+    DB_PORT=5432
+    DB_NAME=crs_db
     JWT_SECRET=your-super-secret-key-12345
     ```
 
@@ -56,11 +61,13 @@ Hệ thống vừa được nâng cấp với các tính năng vượt trội:
     ```bash
     docker-compose up --build
     ```
-    Hệ thống sẽ tự động khởi tạo Database, Backend, Frontend và Kong Gateway.
+    Hệ thống sẽ tự động khởi tạo Database, Backend và Frontend.
 
 ### 3. Truy cập
 *   **Frontend (Portal):** `http://localhost:5173`
-*   **Backend API (via Kong):** `http://localhost:8000/api`
+*   **Backend API:** `http://localhost:3000/api`
+
+> **Lưu ý:** Phần cấu hình `Kong Gateway` trong `docker-compose.yml` đang được comment lại. Nếu bạn muốn bật Kong, hãy mở lại các service `kong-gateway`, `kong-configurator`, `kong-db` và đảm bảo thêm biến môi trường cho Kong.
 
 ---
 

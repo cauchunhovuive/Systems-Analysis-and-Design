@@ -23,6 +23,8 @@ services:
     build:
       context: ./services/backend-app  # Use the new directory context
       dockerfile: Dockerfile
+    env_file:
+      - .env
     environment:
       # Pass variables from the root .env file
       - DB_USER=${POSTGRES_USER}
@@ -90,6 +92,8 @@ services:
   
   postgres-db:
     image: postgres:15-alpine
+    env_file:
+      - .env
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

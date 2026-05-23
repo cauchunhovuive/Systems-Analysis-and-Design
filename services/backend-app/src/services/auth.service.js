@@ -46,7 +46,7 @@ const loginUser = async (email, password) => {
   const token = jwt.sign(
     { id: user.id, email: user.email, role: user.role },
     JWT_SECRET,
-    { expiresIn: '3h' } // Token will be valid for 1 hour
+    { expiresIn: '3h' } // Token will be valid for 3 hours
   );
 
   // 4. Return the user info (without password) and the token
