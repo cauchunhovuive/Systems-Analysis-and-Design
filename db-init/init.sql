@@ -59,7 +59,7 @@ CREATE TABLE "enrollments" (
 );
 
 INSERT INTO users (email, password_hash, full_name, role)
-VALUES ('superadmin@mail.com', '$2b$10$kZZj7Bb17dk.coxYLqFqFu0KxjEMjVSUuRBh.6YiLAb.s6hueiOay', 'Super Admin', 'ADMIN');
+VALUES ('superadmin@mail.com', '$2b$10$W5oS4Ix84ndGU3qKQoVRoufnuUnsBu3RT5WqPdPz5xLaqRtFNptEW', 'Super Admin', 'ADMIN');
 
 --- passwords are 'password123'
 INSERT INTO users (email, password_hash, full_name, role)
