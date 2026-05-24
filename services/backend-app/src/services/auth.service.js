@@ -43,11 +43,12 @@ const loginUser = async (email, password) => {
   }
 
   // 3. Generate a JWT if credentials are valid
-  const token = jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
-    JWT_SECRET,
-    { expiresIn: '3h' } // Token will be valid for 3 hours
-  );
+  // 3. Generate a JWT if credentials are valid
+const token = jwt.sign(
+  { id: user.id, email: user.email, role: user.role },
+  JWT_SECRET,
+  { expiresIn: '7d' } // ← đổi từ '3h' thành '7d'
+);
 
   // 4. Return the user info (without password) and the token
   return {

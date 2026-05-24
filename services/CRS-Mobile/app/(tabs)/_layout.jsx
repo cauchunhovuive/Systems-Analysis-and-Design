@@ -1,6 +1,8 @@
 import { Tabs } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { COLORS } from '../../constants/theme';
+import { useAuth } from '../../services/AuthContext';
+import { Redirect } from 'expo-router';
 
 function TabIcon({ focused, label, icon }) {
   return (
@@ -12,6 +14,22 @@ function TabIcon({ focused, label, icon }) {
 }
 
 export default function TabsLayout() {
+  const { user, loading } = useAuth();
+
+  // Chờ auth load xong
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    );
+  }
+
+  // Chưa đăng nhập → về trang login
+  if (!user) {
+    return <Redirect href="/(auth)/login" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -55,6 +73,12 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+  },
   tabBar: {
     backgroundColor: COLORS.white,
     borderTopWidth: 0.5,

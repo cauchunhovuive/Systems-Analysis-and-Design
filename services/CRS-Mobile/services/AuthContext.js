@@ -13,18 +13,23 @@ export function AuthProvider({ children }) {
   }, []);
 
   const checkAuth = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const userData = await AsyncStorage.getItem('user');
-      if (token && userData) {
-        setUser(JSON.parse(userData));
-      }
-    } catch (e) {
-      console.log('Auth check error:', e);
-    } finally {
-      setLoading(false);
+  try {
+    const token = await AsyncStorage.getItem('token');
+    const userData = await AsyncStorage.getItem('user');
+    
+    console.log('=== checkAuth ===');
+    console.log('token:', token);        // ← thêm dòng này
+    console.log('userData:', userData);  // ← thêm dòng này
+    
+    if (token && userData) {
+      setUser(JSON.parse(userData));
     }
-  };
+  } catch (e) {
+    console.log('Auth check error:', e);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
